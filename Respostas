@@ -1,0 +1,201 @@
+/*Relatorio01*/
+select 
+empregado.nome 'Nome Empregado',
+empregado.cpf 'CPF Empregado',
+empregado.dataAdm 'Data Admissão',
+empregado.salario 'Salário',
+departamento.nome 'Departamento',
+telefone.numero 'Número de Telefone' 
+
+from empregado
+
+left join departamento on Departamento.idDepartamento = empregado.Departamento_idDepartamento
+left join telefone on telefone.Empregado_cpf = empregado.cpf
+
+where dataAdm between '2022-03-01 00:00:00' and '2024-03-01 00:00:00'
+order by dataAdm desc;
+/*As data do relatorio (2019-01-01 e 2022-03-31) não possuiam nenhum registro, então mudei as data para 2022-03-01 e 2024-03-01*/
+
+
+ 
+/*Relatorio02*/
+select 
+empregado.nome 'Nome Empregado',
+empregado.cpf 'CPF Empregado',
+empregado.dataAdm 'Data Admissão',
+FORMAT(empregado.salario, 2, 'de_DE')'Salário',
+departamento.nome 'Departamento',
+telefone.numero 'Número de Telefone' 
+
+from empregado
+
+left join departamento on Departamento.idDepartamento = empregado.Departamento_idDepartamento
+left join telefone on telefone.Empregado_cpf = empregado.cpf
+
+where empregado.salario < (select avg(salario) from empregado)
+order by empregado.nome;
+
+
+ 
+/*Relatorio03*/
+select
+departamento.nome 'departamento', 
+count(distinct(empregado.nome)) 'Qtd empregados', 
+round(avg(empregado.salario),2) 'Média Salarial',
+round(avg(empregado.comissao),2) 'Média De Comissão'
+
+from departamento
+
+left join empregado on empregado.Departamento_idDepartamento = departamento.idDepartamento
+group by departamento
+order by departamento;
+
+
+
+/*Relatorio04*/
+select
+empregado.nome 'Nome empregado', 
+empregado.cpf 'CPF Empregado',
+empregado.sexo,
+format(empregado.salario,2, 'de_DE'),
+count(venda.idVenda) 'Qtd Vendas', 
+sum(venda.valor) 'Total Valor Vendido',
+sum(venda.comissao) 'Total Comissao das Vendas'
+
+from empregado
+
+left join venda on empregado.cpf = venda.Empregado_cpf
+group by empregado.nome, empregado.cpf, empregado.salario
+order by count(venda.idVenda) desc;
+
+
+
+/*Relatorio05*/
+select 
+empregado.nome,
+empregado.cpf,
+empregado.sexo,
+format(empregado.salario,2, 'de_DE') 'Salário',
+count(distinct (venda.idVenda)) as 'Qtd_Vendas_com_Serviços',
+sum(servico.valorVenda) 'Total Valor Vendido com Serviços',
+sum(empregado.comissao) 'Total Comissão das Vendas com Serviço'
+
+from empregado
+
+left join venda on empregado.cpf = venda.Empregado_cpf
+left join servico on venda.idVenda = servico.idServico
+group by empregado.nome, empregado.cpf, empregado.salario
+order by Qtd_Vendas_com_Serviços desc;
+
+
+
+/*Relatorio06*/
+select pet.nome 'Nome Pet',
+venda.data 'Data Serviço',
+servico.nome 'Nome do Serviço',
+itensservico.quantidade 'Quantidade',
+itensservico.valor 'Valor',
+empregado.cpf 'Empregado que Realizou'
+
+from itensservico
+
+left join pet on itensservico.PET_idPET = pet.idPET
+inner join venda on itensservico.Venda_idVenda = venda.idVenda
+inner join empregado on itensservico.Empregado_cpf = empregado.cpf
+inner join servico on itensservico.Servico_idServico = servico.idServico
+order by venda.data desc;
+
+
+
+/*Relatorio07*/
+select 
+venda.data 'Data da Venda',
+concat('R$ ' ,format(venda.valor,2, 'de_DE')) 'Valor da Venda',
+venda.desconto 'Desconto da Venda',
+venda.valor - venda.desconto 'Valor Final',
+empregado.cpf 'Empregado que Realizou a Venda'
+
+
+from venda
+
+inner join empregado on venda.Empregado_cpf = empregado.cpf
+order by venda.data desc;
+
+
+
+/*Relatorio08*/
+select
+servico.nome 'Nome do Serviço',
+count(venda.idVenda) 'Qtd Vendas',
+sum(venda.valor) 'Total de valor vendido'
+
+from servico
+
+inner join venda on servico.idServico = venda.idVenda
+group by servico.nome
+order by count(venda.idVenda) desc
+limit 10;
+
+
+
+/*Relatorio09*/
+select
+formapgvenda.tipo 'Tipo Forma de Pagamento',
+count(venda.idVenda) 'Qnt Vendas',
+sum(formapgvenda.valorPago) 'Total Valor Vendido'
+
+from formapgvenda
+
+inner join venda on formapgvenda.Venda_idVenda = venda.idVenda
+group by formapgvenda.tipo
+order by count(venda.idVenda) desc;
+
+
+
+/*Relatorio10*/
+select 
+venda.data 'Data Venda',
+format(SUM(itensvendaprod.quantidade),0, 'de_DE') 'Quantidade de Vendas',
+sum(venda.valor) 'Valor Total Venda'
+
+from venda
+
+inner join itensvendaprod on venda.idVenda = itensvendaprod.Venda_idVenda
+group by venda.data
+order by venda.data desc;
+
+
+
+/*Relatorio11*/
+select 
+produtos.nome 'Nome Produto',
+concat('R$ ' ,format(produtos.precoCusto,2, 'de_DE')) 'Valor Produto',
+produtos.marca 'Categoria do Produto',
+fornecedor.nome 'Nome Fornecedor',
+fornecedor.email 'Email Fornecedor',
+telefone.numero 'Telefone Fornecedor'
+
+
+from produtos
+
+inner join itenscompra on produtos.idProduto = itenscompra.Produtos_idProduto
+inner join compras on itenscompra.Compras_idCompra = compras.idCompra
+inner join fornecedor on compras.Fornecedor_cpf_cnpj = fornecedor.cpf_cnpj
+left join telefone on fornecedor.cpf_cnpj = telefone.Fornecedor_cpf_cnpj
+
+order by produtos.nome;
+
+
+
+/*Relatorio12*/
+select
+produtos.nome 'Nome Produto',
+format(sum(itensvendaprod.quantidade),0, 'de_DE') 'Qtd Total Vendas',
+sum(itensvendaprod.quantidade * produtos.precoCusto) 'Valor Total Recebido'
+
+from produtos
+
+inner join itensvendaprod on produtos.idProduto = itensvendaprod.Produto_idProduto
+group by produtos.nome
+order by sum(itensvendaprod.quantidade) desc;
+
